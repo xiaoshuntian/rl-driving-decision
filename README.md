@@ -2,6 +2,10 @@
 
 > Reinforcement-learning baselines for autonomous-driving decision-making in highway-env, with a planned extension to CARLA / nuPlan and Diffusion Policy.
 
+![banner](assets/social_preview.png)
+
+English · [中文说明](README.zh-CN.md)
+
 This is the main personal project for my 2026 summer internship application — a layered comparison of **PPO**, **SAC**, **Behavior Cloning** and **Diffusion Policy** on highway-env scenarios (lane-keeping, lane change, merge), with the explicit goal of reproducing the kind of reward-shaping / closed-loop-eval / policy-fine-tuning workflow described in production planner JDs.
 
 **Author**: Xiao Shuntian (Tongji Univ., Transportation Eng., class of 2027)　|　**Status**: Phase 1 (PPO baseline)
@@ -114,13 +118,57 @@ python scripts/train.py --algo sac --config configs/sac_highway.yaml
 
 ---
 
+## Results
+
+### Phase 1 · PPO baseline on highway-fast-v0
+
+![PPO learning curve](assets/ppo_highway_fast_reward.png)
+
+| metric | value |
+|--------|-------|
+| total timesteps | 20 480 |
+| starting ep_rew_mean | 9.7 |
+| **final ep_rew_mean** | **27.4** |
+| starting ep_len_mean | 12.8 |
+| **final ep_len_mean** | **38.4 / 40** |
+| wall-clock (CPU) | ~111 min |
+
+Deterministic evaluation (20 episodes, final model):
+
+| metric | value |
+|--------|-------|
+| mean return | **27.15 ± 4.66** |
+| mean episode length | 38.5 / 40 |
+| **crash rate** | **5.0 %** (1/20) |
+
+Within ~10 PPO iterations the agent drops the crash rate from a random-policy ~50% down to 5% and consistently runs out the 40-step episode cap. Phase 2 will warm-start with Behavior Cloning to see if we can halve the required training steps.
+
+Full per-iteration log: [`docs/experiment_log.md`](docs/experiment_log.md).
+
+---
+
 ## Roadmap
 
 - [x] Phase 0 — repo skeleton, config-driven training pipeline
-- [ ] Phase 1 — PPO + SAC baselines, eval scripts, training curves recorded in `docs/experiment_log.md`
+- [x] Phase 1 — PPO baseline trained, evaluated, plotted (20k steps, 5% crash rate)
+- [ ] Phase 1.5 — SAC baseline + side-by-side comparison
+- [ ] Phase 1.6 — full 200k-step PPO run for convergence study
 - [ ] Phase 2 — Behavior Cloning module + IL warm-start; CARLA leaderboard-2.0 simplified scenarios
 - [ ] Phase 3 — Diffusion Policy reproduction (Chi et al., 2023) and head-to-head comparison on the same scenarios
 - [ ] Phase 4 — write up as a 6-8 page technical report under `docs/`
+
+---
+
+## Reproduce the curve in this README
+
+```bash
+python scripts/train.py --algo ppo --config configs/ppo_highway.yaml \
+    --total-timesteps 20000 > /tmp/train.log 2>&1
+python scripts/plot_from_log.py --log /tmp/train.log \
+    --title "PPO on highway-fast-v0" --out assets/ppo_highway_fast_reward.png
+python scripts/eval.py --algo ppo --config configs/ppo_highway.yaml \
+    --model runs/ppo_highway_fast/final_model.zip --episodes 20
+```
 
 ## Reading list
 
