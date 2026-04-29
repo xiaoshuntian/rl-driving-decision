@@ -1,0 +1,20 @@
+# Core RL stack
+gymnasium>=0.29
+highway-env>=1.10
+stable-baselines3>=2.4
+torch>=2.2
+
+# Logging / tracking
+tensorboard>=2.16
+# wandb>=0.17  # optional, uncomment when ready
+
+# Utilities
+numpy>=1.26
+pyyaml>=6.0
+tqdm>=4.66
+matplotlib>=3.8
+imageio>=2.34
+imageio-ffmpeg>=0.5
+
+# Dev
+pytest>=8.0
